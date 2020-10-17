@@ -37,6 +37,29 @@ func (s *Solution) CalculateDistance() int {
 	return 0
 }
 
+func (s *Solution) SwapVertexInCluster(cluster int) {
+
+	// swaps current vertex in cluster to another random vertex from the same cluster.
+	// the swap is guaranteed, unless cluster is of size 1
+
+	if len(s.Instance.clusters[cluster]) == 1 {
+		return
+	}
+
+	rndIndex := pkg.GetRandomInteger(len(s.Instance.clusters[cluster]))
+	newVertex := s.Instance.clusters[cluster][rndIndex]
+
+	// if we have selected the same vertex, we gonna call a function again,
+	// until a different vertex is selected
+
+	if newVertex == s.Vertices[cluster] {
+		s.SwapVertexInCluster(cluster)
+		return
+	}
+
+	s.Vertices[cluster] = newVertex
+}
+
 func (s *Solution) IsFeasible() bool {
 
 	// check if vertex actually exists in the corresponding cluster

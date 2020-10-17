@@ -5,6 +5,40 @@ import (
 	"testing"
 )
 
+func TestSolution_SwapVertexInCluster_ClusterSizeOne(t *testing.T) {
+	inst, err := NewInstance(10, 3)
+	assert.True(t, err == nil)
+
+	// only a single vertex in cluster 1
+
+	inst.clusters[0] = []int{0}
+
+	solution := GenerateSolution(*inst)
+
+	vertex := solution.Vertices[0]
+
+	solution.SwapVertexInCluster(0)
+
+	// the vertex should have not changed
+
+	assert.Equal(t, solution.Vertices[0], vertex)
+}
+
+func TestSolution_SwapVertexInCluster(t *testing.T) {
+	inst, err := NewInstance(10, 3)
+	assert.True(t, err == nil)
+
+	inst.clusters[0] = []int{0,3}
+
+	solution := GenerateSolution(*inst)
+
+	initialVertex := solution.Vertices[0]
+
+	solution.SwapVertexInCluster(0)
+
+	assert.NotEqual(t, solution.Vertices[0], initialVertex)
+}
+
 func TestSolution_UpdateDistance(t *testing.T) {
 	inst, err := NewInstance(10, 3)
 	assert.True(t, err == nil)
