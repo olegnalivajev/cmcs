@@ -8,7 +8,6 @@ import (
 )
 
 type Instance struct {
-	name         string
 	nodeCount    int
 	clusterCount int
 	distances    [][]int
@@ -132,8 +131,8 @@ func (inst *Instance) calculateDistances(nodes []NodeCoord) {
 
 func (inst *Instance) generateClusters() {
 
-	// add a single node to each of clusters to ensure
-	// there's at least one node in each cluster
+	// add a single node to each cluster to ensure
+	// there's at least one node
 
 	for i := 0; i < inst.clusterCount; i++ {
 		inst.clusters[i] = []int{i}
