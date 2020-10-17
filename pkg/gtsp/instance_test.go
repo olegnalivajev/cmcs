@@ -63,6 +63,20 @@ func TestInstance_VertexInCluster_VertexDoesNotExists(t *testing.T) {
 	assert.EqualValues(t, "no such vertex exists in any cluster", err.Error())
 }
 
+func TestInstance_DeepCopy(t *testing.T) {
+	instance, err := NewInstance(10, 3)
+	assert.True(t, err == nil)
+
+	deepCopy := instance.DeepCopy()
+
+	assert.Equal(t, *instance, *deepCopy)
+	assert.False(t, &instance == &deepCopy)
+	assert.False(t, &instance.clusters == &deepCopy.clusters)
+	assert.False(t, &instance.distances == &deepCopy.distances)
+	assert.False(t, &instance.nodeCount == &deepCopy.nodeCount)
+	assert.False(t, &instance.clusterCount == &deepCopy.clusterCount)
+}
+
 func TestInstance_VertexInCluster(t *testing.T) {
 	clusters := map[int][]int{
 		0: {1, 2, 3},

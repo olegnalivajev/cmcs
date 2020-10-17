@@ -21,6 +21,7 @@ func GenerateSolution(instance Instance) *Solution {
 		NextCluster: make([]int, instance.clusterCount),
 	}
 	solution.generateInitialSolution()
+	solution.CalculateDistance()
 	return &solution
 }
 
@@ -28,22 +29,68 @@ func (s *Solution) UpdateDistance(amount int) {
 	s.Distance += amount
 }
 
-// TODO: implement
 func (s *Solution) CalculateDistance() int {
+	s.Distance = 0
+	for i, v := range s.Vertices {
+		s.Distance += s.Instance.GetDistance(v, s.Vertices[s.NextCluster[i]])
+	}
 	return 0
 }
 
-// TODO: implement
 func (s *Solution) IsFeasible() bool {
 
-	return true
+	// check if vertex actually exists in the corresponding cluster
+
+	for i, v := range s.Vertices {
+		found := false
+		for _, vertex := range s.Instance.clusters[i] {
+			if v == vertex {
+				found = true
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+
+	// check if slices with next & previous clusters correspond
+
+	for i := 0; i < s.Instance.clusterCount; i++ {
+		if s.PrevCluster[s.NextCluster[i]] != i {
+			return false
+		}
+	}
+
+	// traverse the entire graph and check if the graph is cyclic
+	// i.e. when it starts at 0, it should end at 0 as well
+
+	firstCluster := 0
+	for i := 0; i < s.Instance.clusterCount; i++ {
+		firstCluster = s.NextCluster[firstCluster]
+	}
+	return firstCluster == 0
+
 }
 
-// TODO: implement
-func (s *Solution) deepCopy() *Solution {
-	return &Solution{
+func (s *Solution) DeepCopy() *Solution {
 
+	vrt := make([]int, len(s.Vertices))
+	copy(vrt, s.Vertices)
+
+	prev := make([]int, len(s.PrevCluster))
+	copy(prev, s.PrevCluster)
+
+	next := make([]int, len(s.NextCluster))
+	copy(next, s.NextCluster)
+
+	return &Solution{
+		Instance:    *s.Instance.DeepCopy(),
+		Distance:    s.Distance,
+		Vertices:    vrt,
+		PrevCluster: prev,
+		NextCluster: next,
 	}
+
 }
 
 func (s *Solution) generateInitialSolution() {
@@ -53,7 +100,7 @@ func (s *Solution) generateInitialSolution() {
 	// first, generate an array of clusters excluding cluster 0, as our generator starts from it anyway
 
 	for i := 0; i < len(clusters); i++ {
-		clusters[i] = i+1
+		clusters[i] = i + 1
 	}
 
 	// pick a cluster at random that would be a next cluster to cluster 0.
@@ -86,13 +133,13 @@ func (s *Solution) generateInitialSolution() {
 
 	s.PrevCluster[0] = curr
 
-
 	// select a random node from each cluster
 
 	for i := 0; i < s.Instance.clusterCount; i++ {
 		rndIndex := len(s.Instance.clusters[i])
 		s.Vertices[i] = s.Instance.clusters[i][pkg.GetRandomInteger(rndIndex)]
 	}
+
 }
 
 // removes an int element from a slice with no duplicates

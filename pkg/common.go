@@ -16,7 +16,7 @@ func init() {
 
 // you can manually change the seed of the generator.
 // useful for testing purposes / when the goal is to achieve
-// the same result on reruns
+// the same result on re-runs
 func InitialiseRandomNumberGenerator(s int64) {
 	Seed = s
 	rand.Seed(Seed)

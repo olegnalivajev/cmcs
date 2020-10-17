@@ -89,6 +89,38 @@ func (inst *Instance) VertexInCluster(v int) (int, error) {
 	return 0, errors.New("no such vertex exists in any cluster")
 }
 
+func (inst *Instance) DeepCopy() *Instance {
+
+	// slice is a reference type, therefore we have to
+	// iterate over the og slice and copy values one by one
+
+	dist := make([][]int, inst.nodeCount)
+	for i := range dist {
+		dist[i] = make([]int, inst.nodeCount)
+		for j := range dist[i] {
+			dist[i][j] = inst.distances[i][j]
+		}
+	}
+
+	// same applies to map of clusters
+
+	cls := make(map[int][]int)
+	for k, v := range inst.clusters {
+		nodes := make([]int, len(v))
+		for i, _ := range v {
+			nodes[i] = v[i]
+		}
+		cls[k] = nodes
+	}
+
+	return &Instance{
+		nodeCount: inst.nodeCount,
+		clusterCount: inst.clusterCount,
+		distances: dist,
+		clusters: cls,
+	}
+}
+
 func (inst *Instance) generateInstance() {
 
 	// first create a plane with random coordinates
