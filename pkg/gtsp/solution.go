@@ -37,6 +37,43 @@ func (s *Solution) CalculateDistance() int {
 	return 0
 }
 
+func (s *Solution) InsertCluster(cluster, afterCluster int) {
+
+	// selected cluster, x, is extracted from it's position and inserted
+	// after cluster z. i.e. prev[x] no longer points to x, but to next[x]
+	// likewise, z no longer points to next[z], but to x, and prev[next[z]]
+	// no longer points to z but to x
+
+	// first update pointers to previous and next clusters
+
+	before := s.PrevCluster[cluster]
+	after := s.NextCluster[cluster]
+	between := s.NextCluster[afterCluster]
+
+	s.NextCluster[before] = after
+	s.NextCluster[afterCluster] = cluster
+	s.NextCluster[cluster] = between
+	s.PrevCluster[after] = before
+	s.PrevCluster[cluster] = afterCluster
+	s.PrevCluster[between] = cluster
+
+	// then recalculate the distance. to make it more efficient and avoid new traversal
+	// we subtract the weights of removed edges, and add the weights of new edges
+
+	clusterVertex := s.Vertices[cluster]
+	beforeVertex := s.Vertices[before]
+	afterVertex := s.Vertices[after]
+	newBeforeVertex := s.Vertices[afterCluster]
+	newAfterVertex := s.Vertices[between]
+
+	s.Distance -= s.Instance.GetDistance(beforeVertex, clusterVertex)
+	s.Distance -= s.Instance.GetDistance(clusterVertex, afterVertex)
+	s.Distance -= s.Instance.GetDistance(newBeforeVertex, newAfterVertex)
+	s.Distance += s.Instance.GetDistance(beforeVertex, afterVertex)
+	s.Distance += s.Instance.GetDistance(newBeforeVertex, clusterVertex)
+	s.Distance += s.Instance.GetDistance(clusterVertex, newAfterVertex)
+}
+
 func (s *Solution) SwapVertexInCluster(cluster int) {
 
 	// swaps current vertex in cluster to another random vertex from the same cluster.

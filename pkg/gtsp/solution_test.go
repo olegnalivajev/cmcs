@@ -5,6 +5,73 @@ import (
 	"testing"
 )
 
+func TestSolution_InsertCluster(t *testing.T) {
+	inst, err := NewInstance(5, 5)
+	assert.True(t, err == nil)
+
+	inst.clusters = map[int][]int{
+		0: {0},
+		1: {1},
+		2: {2},
+		3: {3},
+		4: {4},
+	}
+
+	inst.distances = [][]int{
+		{0, 8, 9, 10, 11},
+		{0, 0, 12, 13, 14},
+		{0, 0, 0, 15, 16},
+		{0, 0, 0, 0, 17},
+		{0, 0, 0, 0, 0},
+	}
+
+	solution := GenerateSolution(*inst)
+
+	// hand-defined cluster sequence: 0 -> 1 -> 2 -> 3 -> 4 -> 0
+
+	solution.PrevCluster = []int{4, 0, 1, 2, 3}
+	solution.NextCluster = []int{1, 2, 3, 4, 0}
+
+	// recalculate the distance
+
+	solution.CalculateDistance()
+
+	// since we have defined distance ourselves, we can assert if it's what we expect
+	// just as a sanity check
+
+	// 0-1 : 8
+	// 1-2 : 12
+	// 2-3 : 15
+	// 3-4 : 17
+	// 4-0 : 11
+	//     = 63
+
+	assert.Equal(t, 63, solution.Distance )
+
+	// let's insert cluster 0 after cluster 3, so the structure of the graph will change to:
+	// 0 -> 4 -> 1 -> 2 -> 3 -> 0
+
+	solution.InsertCluster(0, 3)
+
+	expectedPrev := []int{3, 4, 1, 2, 0}
+	expectedNext := []int{4, 2, 3, 0, 1}
+
+	// removed edges:
+	// 0-1 : 8
+	// 4-0 : 11
+	// 3-4 : 17
+	// added edges:
+	// 4-1 : 14
+	// 3-0 : 10
+	// 0-4 : 11
+
+	expectedDistance := 62
+
+	assert.Equal(t, solution.NextCluster, expectedNext)
+	assert.Equal(t, solution.PrevCluster, expectedPrev)
+	assert.Equal(t, solution.Distance, expectedDistance)
+}
+
 func TestSolution_SwapVertexInCluster_ClusterSizeOne(t *testing.T) {
 	inst, err := NewInstance(10, 3)
 	assert.True(t, err == nil)
@@ -28,7 +95,7 @@ func TestSolution_SwapVertexInCluster(t *testing.T) {
 	inst, err := NewInstance(10, 3)
 	assert.True(t, err == nil)
 
-	inst.clusters[0] = []int{0,3}
+	inst.clusters[0] = []int{0, 3}
 
 	solution := GenerateSolution(*inst)
 
@@ -110,8 +177,8 @@ func TestSolution_IsFeasible_PreviousNextDoNotCorrespond(t *testing.T) {
 	// assign vertex from a different cluster
 	// e.g. first vertex from cluster 1 as a vertex in cluster 0
 
-	solution.NextCluster = []int{1,2,0}
-	solution.PrevCluster = []int{2,1,0}
+	solution.NextCluster = []int{1, 2, 0}
+	solution.PrevCluster = []int{2, 1, 0}
 
 	assert.False(t, solution.IsFeasible())
 }
