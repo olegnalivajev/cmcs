@@ -8,10 +8,12 @@ import (
 )
 
 type Instance struct {
-	nodeCount    int
-	clusterCount int
-	distances    [][]int
-	clusters     map[int][]int
+	Triangle     bool
+	Symmetric    bool
+	NodeCount    int
+	ClusterCount int
+	Distances    [][]int
+	Clusters     map[int][]int
 }
 
 type NodeCoord struct {
@@ -24,17 +26,19 @@ func NewInstance(nodeCount, clusterCount int) (*Instance, error) {
 		return nil, errors.New("`node count` expected to be greater than `cluster count`")
 	}
 
-	// initialise distances slice
+	// initialise Distances slice
 	w := make([][]int, nodeCount)
 	for i := range w {
 		w[i] = make([]int, nodeCount)
 	}
 
 	instance := Instance{
-		nodeCount:    nodeCount,
-		clusterCount: clusterCount,
-		distances:    w,
-		clusters:     make(map[int][]int),
+		Triangle: false,
+		Symmetric: true,
+		NodeCount:    nodeCount,
+		ClusterCount: clusterCount,
+		Distances:    w,
+		Clusters:     make(map[int][]int),
 	}
 
 	instance.generateInstance()
@@ -43,7 +47,7 @@ func NewInstance(nodeCount, clusterCount int) (*Instance, error) {
 }
 
 func (inst *Instance) PrintWeights() {
-	for _, v := range inst.distances {
+	for _, v := range inst.Distances {
 		for _, k := range v {
 			fmt.Printf("%5d", k)
 		}
@@ -52,24 +56,24 @@ func (inst *Instance) PrintWeights() {
 }
 
 func (inst *Instance) GetInstanceName() string {
-	return fmt.Sprintf(`s%d-n%d-c%d`, pkg.Seed, inst.nodeCount, inst.clusterCount)
+	return fmt.Sprintf(`s%d-n%d-c%d`, pkg.Seed, inst.NodeCount, inst.ClusterCount)
 }
 
 func (inst *Instance) GetDistance(from, to int) int {
 
-	// since the graph isn't directional, we only save distances from smaller node
+	// since the graph isn't directional, we only save Distances from smaller node
 	// to higher node. vice versa has the same distance
 
 	if from < to {
-		return inst.distances[from][to]
+		return inst.Distances[from][to]
 	}
-	return inst.distances[to][from]
+	return inst.Distances[to][from]
 }
 
 func (inst *Instance) GetMinCluster() int {
 	minCluster := 0
 	minVertexNum := int(^uint(0) >> 1)
-	for cluster, vertices := range inst.clusters {
+	for cluster, vertices := range inst.Clusters {
 		if len(vertices) < minVertexNum {
 			minVertexNum = len(vertices)
 			minCluster = cluster
@@ -79,7 +83,11 @@ func (inst *Instance) GetMinCluster() int {
 }
 
 func (inst *Instance) VertexInCluster(v int) (int, error) {
-	for cluster, vertices := range inst.clusters {
+
+	// returns a clusters in which given vertex is placed/
+	// if no such vertex exists returns an error
+
+	for cluster, vertices := range inst.Clusters {
 		for _, vertex := range vertices {
 			if vertex == v {
 				return cluster, nil
@@ -94,18 +102,18 @@ func (inst *Instance) DeepCopy() *Instance {
 	// slice is a reference type, therefore we have to
 	// iterate over the og slice and copy values one by one
 
-	dist := make([][]int, inst.nodeCount)
+	dist := make([][]int, inst.NodeCount)
 	for i := range dist {
-		dist[i] = make([]int, inst.nodeCount)
+		dist[i] = make([]int, inst.NodeCount)
 		for j := range dist[i] {
-			dist[i][j] = inst.distances[i][j]
+			dist[i][j] = inst.Distances[i][j]
 		}
 	}
 
-	// same applies to map of clusters
+	// same applies to map of Clusters
 
 	cls := make(map[int][]int)
-	for k, v := range inst.clusters {
+	for k, v := range inst.Clusters {
 		nodes := make([]int, len(v))
 		for i, _ := range v {
 			nodes[i] = v[i]
@@ -114,10 +122,10 @@ func (inst *Instance) DeepCopy() *Instance {
 	}
 
 	return &Instance{
-		nodeCount: inst.nodeCount,
-		clusterCount: inst.clusterCount,
-		distances: dist,
-		clusters: cls,
+		NodeCount:    inst.NodeCount,
+		ClusterCount: inst.ClusterCount,
+		Distances:    dist,
+		Clusters:     cls,
 	}
 }
 
@@ -128,13 +136,13 @@ func (inst *Instance) generateInstance() {
 
 	nodes := inst.generateCoordinates()
 
-	// now calculates the distance (distances) between
+	// now calculates the distance (Distances) between
 	// each node
 
 	inst.calculateDistances(nodes)
 
-	// generate clusters and distribute the nodes between
-	// these clusters. distribution is up to the random
+	// generate Clusters and distribute the nodes between
+	// these Clusters. distribution is up to the random
 	// number generator
 	// TODO: implement different kinds of distributions?
 
@@ -142,11 +150,11 @@ func (inst *Instance) generateInstance() {
 }
 
 func (inst *Instance) generateCoordinates() []NodeCoord {
-	var nodes = make([]NodeCoord, inst.nodeCount)
-	for i := 0; i < inst.nodeCount; i++ {
+	var nodes = make([]NodeCoord, inst.NodeCount)
+	for i := 0; i < inst.NodeCount; i++ {
 		coordinate := NodeCoord{
-			x: pkg.GetRandomInteger(inst.nodeCount * 5),
-			y: pkg.GetRandomInteger(inst.nodeCount * 5),
+			x: pkg.GetRandomInteger(inst.NodeCount * 5),
+			y: pkg.GetRandomInteger(inst.NodeCount * 5),
 		}
 		nodes[i] = coordinate
 	}
@@ -154,9 +162,11 @@ func (inst *Instance) generateCoordinates() []NodeCoord {
 }
 
 func (inst *Instance) calculateDistances(nodes []NodeCoord) {
-	for i := 0; i < inst.nodeCount; i++ {
-		for j := i + 1; j < inst.nodeCount; j++ {
-			inst.distances[i][j] = calculateDistance(nodes[i], nodes[j])
+	for i := 0; i < inst.NodeCount; i++ {
+		for j := i + 1; j < inst.NodeCount; j++ {
+			distance := calculateDistance(nodes[i], nodes[j])
+			inst.Distances[i][j] = distance
+			inst.Distances[j][i] = distance
 		}
 	}
 }
@@ -166,15 +176,15 @@ func (inst *Instance) generateClusters() {
 	// add a single node to each cluster to ensure
 	// there's at least one node
 
-	for i := 0; i < inst.clusterCount; i++ {
-		inst.clusters[i] = []int{i}
+	for i := 0; i < inst.ClusterCount; i++ {
+		inst.Clusters[i] = []int{i}
 	}
 
-	// distribute remaining nodes randomly between clusters
+	// distribute remaining nodes randomly between Clusters
 
-	for i := inst.clusterCount; i < inst.nodeCount; i++ {
-		cluster := pkg.GetRandomInteger(inst.clusterCount)
-		inst.clusters[cluster] = append(inst.clusters[cluster], i)
+	for i := inst.ClusterCount; i < inst.NodeCount; i++ {
+		cluster := pkg.GetRandomInteger(inst.ClusterCount)
+		inst.Clusters[cluster] = append(inst.Clusters[cluster], i)
 	}
 }
 

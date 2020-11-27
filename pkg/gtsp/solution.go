@@ -16,9 +16,9 @@ func GenerateSolution(instance Instance) *Solution {
 	solution := Solution{
 		Instance:    instance,
 		Distance:    0,
-		Vertices:    make([]int, instance.clusterCount),
-		PrevCluster: make([]int, instance.clusterCount),
-		NextCluster: make([]int, instance.clusterCount),
+		Vertices:    make([]int, instance.ClusterCount),
+		PrevCluster: make([]int, instance.ClusterCount),
+		NextCluster: make([]int, instance.ClusterCount),
 	}
 	solution.generateInitialSolution()
 	solution.CalculateDistance()
@@ -44,7 +44,7 @@ func (s *Solution) InsertCluster(cluster, afterCluster int) {
 	// likewise, z no longer points to next[z], but to x, and prev[next[z]]
 	// no longer points to z but to x
 
-	// first update pointers to previous and next clusters
+	// first update pointers to previous and next Clusters
 
 	before := s.PrevCluster[cluster]
 	after := s.NextCluster[cluster]
@@ -79,12 +79,12 @@ func (s *Solution) SwapVertexInCluster(cluster int) {
 	// swaps current vertex in cluster to another random vertex from the same cluster.
 	// the swap is guaranteed, unless cluster is of size 1
 
-	if len(s.Instance.clusters[cluster]) == 1 {
+	if len(s.Instance.Clusters[cluster]) == 1 {
 		return
 	}
 
-	rndIndex := pkg.GetRandomInteger(len(s.Instance.clusters[cluster]))
-	newVertex := s.Instance.clusters[cluster][rndIndex]
+	rndIndex := pkg.GetRandomInteger(len(s.Instance.Clusters[cluster]))
+	newVertex := s.Instance.Clusters[cluster][rndIndex]
 
 	// if we have selected the same vertex, we gonna call a function again,
 	// until a different vertex is selected
@@ -103,7 +103,7 @@ func (s *Solution) IsFeasible() bool {
 
 	for i, v := range s.Vertices {
 		found := false
-		for _, vertex := range s.Instance.clusters[i] {
+		for _, vertex := range s.Instance.Clusters[i] {
 			if v == vertex {
 				found = true
 			}
@@ -113,9 +113,9 @@ func (s *Solution) IsFeasible() bool {
 		}
 	}
 
-	// check if slices with next & previous clusters correspond
+	// check if slices with next & previous Clusters correspond
 
-	for i := 0; i < s.Instance.clusterCount; i++ {
+	for i := 0; i < s.Instance.ClusterCount; i++ {
 		if s.PrevCluster[s.NextCluster[i]] != i {
 			return false
 		}
@@ -125,7 +125,7 @@ func (s *Solution) IsFeasible() bool {
 	// i.e. when it starts at 0, it should end at 0 as well
 
 	firstCluster := 0
-	for i := 0; i < s.Instance.clusterCount; i++ {
+	for i := 0; i < s.Instance.ClusterCount; i++ {
 		firstCluster = s.NextCluster[firstCluster]
 	}
 	return firstCluster == 0
@@ -155,17 +155,17 @@ func (s *Solution) DeepCopy() *Solution {
 
 func (s *Solution) generateInitialSolution() {
 
-	clusters := make([]int, s.Instance.clusterCount-1)
+	clusters := make([]int, s.Instance.ClusterCount-1)
 
-	// first, generate an array of clusters excluding cluster 0, as our generator starts from it anyway
+	// first, generate an array of Clusters excluding cluster 0, as our generator starts from it anyway
 
 	for i := 0; i < len(clusters); i++ {
 		clusters[i] = i + 1
 	}
 
 	// pick a cluster at random that would be a next cluster to cluster 0.
-	// remove it from available clusters, however it's now recorded as current cluster
-	// so we can iteratively pick random clusters to follow the current one
+	// remove it from available Clusters, however it's now recorded as current cluster
+	// so we can iteratively pick random Clusters to follow the current one
 
 	rnd := pkg.GetRandomInteger(len(clusters))
 	curr := clusters[rnd]
@@ -179,7 +179,7 @@ func (s *Solution) generateInitialSolution() {
 	// starting at node `x`, going through each node, and returning into node `x`),
 	// the iteration starts from i = 2
 
-	for i := 2; i < s.Instance.clusterCount; i++ {
+	for i := 2; i < s.Instance.ClusterCount; i++ {
 		rnd = pkg.GetRandomInteger(len(clusters))
 		cluster := clusters[rnd]
 		s.NextCluster[curr] = cluster
@@ -195,9 +195,9 @@ func (s *Solution) generateInitialSolution() {
 
 	// select a random node from each cluster
 
-	for i := 0; i < s.Instance.clusterCount; i++ {
-		rndIndex := len(s.Instance.clusters[i])
-		s.Vertices[i] = s.Instance.clusters[i][pkg.GetRandomInteger(rndIndex)]
+	for i := 0; i < s.Instance.ClusterCount; i++ {
+		rndIndex := len(s.Instance.Clusters[i])
+		s.Vertices[i] = s.Instance.Clusters[i][pkg.GetRandomInteger(rndIndex)]
 	}
 
 }

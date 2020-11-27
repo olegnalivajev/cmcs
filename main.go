@@ -2,18 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/olegnalivajev/cmcs/cmd"
-	"github.com/olegnalivajev/cmcs/pkg/gtsp"
+	"github.com/olegnalivajev/cmcs/pkg/io"
 )
 
 func main() {
-	cmd.Execute()
-	test()
-}
+	//instance, err := gtsp.NewInstance(40, 7)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//io.ExportInstance(*instance, "C:\\Users\\Oleg\\Documents\\Projects\\cmcs")
 
-func test() {
-	inst, _ := gtsp.NewInstance(22, 5)
-	fmt.Println(inst.GetDistance(0, 3))
-	fmt.Println(inst.GetDistance(3, 0))
+	inst, _ := io.ImportInstance("C:\\Users\\Oleg\\Documents\\Projects\\cmcs\\test_instance.txt")
+	fmt.Println(inst)
 }
-

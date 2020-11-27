@@ -9,7 +9,7 @@ func TestSolution_InsertCluster(t *testing.T) {
 	inst, err := NewInstance(5, 5)
 	assert.True(t, err == nil)
 
-	inst.clusters = map[int][]int{
+	inst.Clusters = map[int][]int{
 		0: {0},
 		1: {1},
 		2: {2},
@@ -17,7 +17,7 @@ func TestSolution_InsertCluster(t *testing.T) {
 		4: {4},
 	}
 
-	inst.distances = [][]int{
+	inst.Distances = [][]int{
 		{0, 8, 9, 10, 11},
 		{0, 0, 12, 13, 14},
 		{0, 0, 0, 15, 16},
@@ -46,7 +46,7 @@ func TestSolution_InsertCluster(t *testing.T) {
 	// 4-0 : 11
 	//     = 63
 
-	assert.Equal(t, 63, solution.Distance )
+	assert.Equal(t, 63, solution.Distance)
 
 	// let's insert cluster 0 after cluster 3, so the structure of the graph will change to:
 	// 0 -> 4 -> 1 -> 2 -> 3 -> 0
@@ -78,7 +78,7 @@ func TestSolution_SwapVertexInCluster_ClusterSizeOne(t *testing.T) {
 
 	// only a single vertex in cluster 1
 
-	inst.clusters[0] = []int{0}
+	inst.Clusters[0] = []int{0}
 
 	solution := GenerateSolution(*inst)
 
@@ -95,7 +95,7 @@ func TestSolution_SwapVertexInCluster(t *testing.T) {
 	inst, err := NewInstance(10, 3)
 	assert.True(t, err == nil)
 
-	inst.clusters[0] = []int{0, 3}
+	inst.Clusters[0] = []int{0, 3}
 
 	solution := GenerateSolution(*inst)
 
@@ -124,7 +124,7 @@ func TestSolution_CalculateDistance(t *testing.T) {
 	inst, err := NewInstance(5, 3)
 	assert.True(t, err == nil)
 
-	inst.distances = [][]int{
+	inst.Distances = [][]int{
 		{0, 5, 8, 12, 10},
 		{0, 0, 10, 4, 13},
 		{0, 0, 0, 12, 15},
@@ -132,7 +132,7 @@ func TestSolution_CalculateDistance(t *testing.T) {
 		{0, 0, 0, 0, 0},
 	}
 
-	inst.clusters = map[int][]int{
+	inst.Clusters = map[int][]int{
 		0: {0},
 		1: {1, 3},
 		2: {2, 4},
@@ -163,7 +163,7 @@ func TestSolution_IsFeasible_IncorrectVertex(t *testing.T) {
 	// assign vertex from a different cluster
 	// e.g. first vertex from cluster 1 as a vertex in cluster 0
 
-	solution.Vertices[0] = inst.clusters[1][0]
+	solution.Vertices[0] = inst.Clusters[1][0]
 
 	assert.False(t, solution.IsFeasible())
 }

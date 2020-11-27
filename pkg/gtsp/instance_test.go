@@ -13,9 +13,9 @@ func TestNewInstanceClusterCountGreaterThanNodeCount(t *testing.T) {
 func TestNewInstanceHappyPath(t *testing.T) {
 	instance, err := NewInstance(10, 3)
 	assert.True(t, err == nil)
-	assert.EqualValues(t, 10, instance.nodeCount)
-	assert.EqualValues(t, 3, instance.clusterCount)
-	assert.True(t, len(instance.clusters) == instance.clusterCount)
+	assert.EqualValues(t, 10, instance.NodeCount)
+	assert.EqualValues(t, 3, instance.ClusterCount)
+	assert.True(t, len(instance.Clusters) == instance.ClusterCount)
 }
 
 func TestInstance_GetInstanceName(t *testing.T) {
@@ -34,7 +34,7 @@ func TestInstance_GetDistance(t *testing.T) {
 	instance, err := NewInstance(10, 3)
 	assert.True(t, err == nil)
 
-	instance.distances = weights
+	instance.Distances = weights
 
 	assert.EqualValues(t, 4, instance.GetDistance(1, 2))
 	assert.EqualValues(t, 4, instance.GetDistance(2, 1))
@@ -44,13 +44,13 @@ func TestInstance_GetMinCluster(t *testing.T) {
 	clusters := map[int][]int{
 		0: {1, 2, 3},
 		1: {4},
-		2: {5,6,7,8},
+		2: {5, 6, 7, 8},
 	}
 
 	instance, err := NewInstance(10, 3)
 	assert.True(t, err == nil)
 
-	instance.clusters = clusters
+	instance.Clusters = clusters
 	assert.EqualValues(t, 1, instance.GetMinCluster())
 }
 
@@ -71,28 +71,28 @@ func TestInstance_DeepCopy(t *testing.T) {
 
 	assert.Equal(t, *instance, *deepCopy)
 	assert.False(t, &instance == &deepCopy)
-	assert.False(t, &instance.clusters == &deepCopy.clusters)
-	assert.False(t, &instance.distances == &deepCopy.distances)
-	assert.False(t, &instance.nodeCount == &deepCopy.nodeCount)
-	assert.False(t, &instance.clusterCount == &deepCopy.clusterCount)
+	assert.False(t, &instance.Clusters == &deepCopy.Clusters)
+	assert.False(t, &instance.Distances == &deepCopy.Distances)
+	assert.False(t, &instance.NodeCount == &deepCopy.NodeCount)
+	assert.False(t, &instance.ClusterCount == &deepCopy.ClusterCount)
 }
 
 func TestInstance_VertexInCluster(t *testing.T) {
 	clusters := map[int][]int{
 		0: {1, 2, 3},
 		1: {4},
-		2: {5,6,7,8},
+		2: {5, 6, 7, 8},
 	}
 
 	instance, err := NewInstance(10, 3)
 	assert.True(t, err == nil)
 
-	instance.clusters = clusters
+	instance.Clusters = clusters
 
 	cluster, err := instance.VertexInCluster(4)
 
 	assert.True(t, err == nil)
-	assert.EqualValues(t, 1, cluster )
+	assert.EqualValues(t, 1, cluster)
 }
 
 func TestInstance_CalculateDistances(t *testing.T) {
@@ -100,8 +100,8 @@ func TestInstance_CalculateDistances(t *testing.T) {
 	assert.True(t, err == nil)
 
 	nodes := []NodeCoord{
-		{4,8},
-		{3,6},
+		{4, 8},
+		{3, 6},
 		{2, 9},
 	}
 
@@ -113,11 +113,11 @@ func TestInstance_CalculateDistances(t *testing.T) {
 		{0, 0, 0},
 	}
 
-	assert.EqualValues(t, instance.distances, expectedDistances)
+	assert.EqualValues(t, instance.Distances, expectedDistances)
 }
 
 func Test_CalculateDistance(t *testing.T) {
-	node1 := NodeCoord{3,5}
+	node1 := NodeCoord{3, 5}
 	node2 := NodeCoord{6, 8}
 
 	expectedDistance := 6
@@ -128,6 +128,6 @@ func Test_CalculateDistance(t *testing.T) {
 func TestInstance_GenerateClustersHasAtLeastASingleNodeInCluster(t *testing.T) {
 	instance, err := NewInstance(3, 2)
 	assert.True(t, err == nil)
-	assert.True(t, len(instance.clusters[0]) > 0)
-	assert.True(t, len(instance.clusters[1]) > 0)
+	assert.True(t, len(instance.Clusters[0]) > 0)
+	assert.True(t, len(instance.Clusters[1]) > 0)
 }
